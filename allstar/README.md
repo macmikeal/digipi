@@ -49,6 +49,19 @@ curl -fsSLO https://raw.githubusercontent.com/macmikeal/digipi/claude/sermon-out
 chmod +x skywarnplus-setup.sh
 ```
 
+### Adding a county later
+
+`--county` **replaces** the whole `CountyCodes` list; it does not append. When
+adding a county to an existing setup, pass every county you want, not just the
+new one — otherwise the others are dropped. The previous list is always saved to
+a timestamped `config.yaml.bak-*` alongside it, so a mistake is recoverable.
+
+```bash
+# adding a fourth county: list all four, not just the new one
+sudo ./skywarnplus-setup.sh --skip-install \
+  --county LAC119 --county LAC017 --county LAC015 --county LAC027
+```
+
 ### County codes
 
 Use the **county** SAME code, never a zone code. The upstream documentation is

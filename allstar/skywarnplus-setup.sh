@@ -140,6 +140,7 @@ set_counties() {
   [[ -f "$CONFIG" ]] || die "$CONFIG not found — install SkywarnPlus first"
 
   info "Writing county code(s) into config.yaml: ${COUNTIES[*]}"
+  warn "this REPLACES the existing county list rather than adding to it"
   local backup; backup="$(backup_config)"
   ok "backed up existing config to $backup"
 
