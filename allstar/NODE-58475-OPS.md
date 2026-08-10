@@ -137,14 +137,47 @@ repeater is the area's node.
 
 ---
 
-## 4. Waiting on information
+## 4. County-based linking — decided, waiting only on node numbers
 
-- [ ] **Node numbers for El Dorado and Willisville.** Search allstarlink.org →
-  Node List by city or callsign, or ask the owners.
-- [ ] **Then decide the linking plan.** El Dorado is in Union Co. (`ARC139`, on the
-  roster). Willisville is in Nevada Co. (`ARC099`, *not* on the roster — add it if
-  that corner matters). One area-wide node → the stock AlertScript block finishes
-  the job. Strictly local nodes → a small county-to-node script gets written.
+Both the El Dorado and Willisville machines are **local repeaters**, so the plan
+is county-mapped linking: while a mapped county has an active *warning*, 58475
+links to that county's repeater; when it clears, the link drops. Stock
+SkywarnPlus can't key on counties, so `allstar/skywarn-county-link.py` (in this
+folder) does it by reading the per-county data SkywarnPlus writes each poll.
+It only ever disconnects links it made itself.
+
+- [ ] **Get the node numbers** — allstarlink.org → Node List, by city or callsign.
+  Courtesy: let the owners know an automatic link will point at them during
+  warnings.
+- [ ] **Fill the numbers into `COUNTY_NODES`** at the top of
+  `skywarn-county-link.py` (entries stay disabled while set to 0).
+- [ ] **Add Nevada Co. to the roster** so Willisville's county is actually
+  watched — this is the 11-county version of the roster command:
+
+  ```bash
+  sudo ./skywarnplus-setup.sh --skip-install \
+    --county LAC119 --county LAC015 --county LAC017 --county LAC027 --county LAC013 \
+    --county ARC027 --county ARC073 --county ARC091 --county ARC139 --county ARC099 \
+    --county TXC203
+  ```
+
+- [ ] **Install the script on the node** (as root):
+
+  ```bash
+  cp skywarn-county-link.py /usr/local/bin/SkywarnPlus/
+  chown asterisk:asterisk /usr/local/bin/SkywarnPlus/skywarn-county-link.py
+  chmod +x /usr/local/bin/SkywarnPlus/skywarn-county-link.py
+  ```
+
+  Then append to `/etc/cron.d/SkywarnPlus` (one line — the sleep lets the
+  same-minute SkywarnPlus poll finish writing its data first):
+
+  ```
+  * * * * * asterisk sleep 20; /usr/local/bin/SkywarnPlus/skywarn-county-link.py >> /tmp/SkywarnPlus/county-link.log 2>&1
+  ```
+
+- [ ] **Drill it**: volcano-inject with `CountyCodes: [ARC139]` on the alert and
+  watch the link come up, then clear it and watch the link drop.
 
 ---
 
